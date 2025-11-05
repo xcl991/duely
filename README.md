@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🎯 Duely - Subscription Management Platform
 
 A modern, full-featured subscription management platform built with Next.js 16, featuring multi-language support (English & Indonesian), real-time notifications, and comprehensive analytics.
@@ -372,3 +373,6 @@ For issues or questions, please open an issue on GitHub.
 **Built with ❤️ using Next.js 16 and TypeScript**
 
 🌍 **Now available in English and Indonesian!**
+=======
+# duely
+>>>>>>> ecce2d5905b2e924f4be09a68754fe45f3da5db2

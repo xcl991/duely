@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
     // Use unified payment gateway factory
     const gateway = getGateway(provider as PaymentProvider);
     const checkoutResponse = await gateway.createCheckout({
+      provider: provider as PaymentProvider,
       userId,
       userEmail,
       userName,
