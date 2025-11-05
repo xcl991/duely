@@ -75,10 +75,59 @@ export const authOptions: NextAuthOptions = {
     error: "/auth/error",
   },
   callbacks: {
-    async jwt({ token, user, trigger, session }) {
+    async signIn({ user, account, profile }) {
+      // Handle Google Sign-In
+      if (account?.provider === "google" && user.email) {
+        try {
+          // Check if user already exists
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email },
+          });
+
+          if (!existingUser) {
+            // Create new user for Google Sign-In
+            await prisma.user.create({
+              data: {
+                email: user.email,
+                name: user.name || "Google User",
+                image: user.image,
+                emailVerified: new Date(), // Google accounts are pre-verified
+                // No password needed for OAuth users
+              },
+            });
+          } else if (!existingUser.image && user.image) {
+            // Update user image if not set
+            await prisma.user.update({
+              where: { email: user.email },
+              data: { image: user.image },
+            });
+          }
+
+          return true;
+        } catch (error) {
+          console.error("Error during Google sign-in:", error);
+          return false;
+        }
+      }
+
+      // Allow credentials sign-in
+      return true;
+    },
+    async jwt({ token, user, trigger, session, account }) {
       // Type guard: Add user id to token on initial sign in
       if (user?.id) {
         token.id = user.id;
+      }
+
+      // For OAuth sign-in, fetch user ID from database
+      if (account?.provider === "google" && user.email && !token.id) {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: user.email },
+          select: { id: true },
+        });
+        if (dbUser) {
+          token.id = dbUser.id;
+        }
       }
 
       // Handle manual session updates (e.g., profile updates)
