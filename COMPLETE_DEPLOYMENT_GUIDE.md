@@ -313,7 +313,38 @@ npm run build
 # Wait for "✓ Compiled successfully" message
 ```
 
-### Step 6: Configure PM2
+### Step 6: Setup Profile Photo Upload Directory
+
+```bash
+# Create uploads directory with proper permissions
+cd ~/duely
+mkdir -p public/uploads/profiles
+
+# Set permissions
+chmod 755 public/uploads
+chmod 755 public/uploads/profiles
+
+# Set ownership (www-data is Nginx user)
+sudo chown -R duely:www-data public/uploads
+
+# CRITICAL: Fix home directory permissions
+# This allows Nginx (www-data) to traverse into subdirectories
+chmod 711 /home/duely
+
+# Verify permissions
+ls -la public/uploads/profiles/
+namei -l ~/duely/public/uploads/profiles/
+
+# Test if Nginx can read
+sudo -u www-data test -r ~/duely/public/uploads/profiles/ && echo "✅ Nginx CAN access" || echo "❌ Nginx CANNOT access"
+```
+
+**Why this is needed:**
+- Profile photos are uploaded to `public/uploads/profiles/`
+- Nginx needs to serve these files directly via `/uploads/` path
+- Without proper permissions, uploaded photos will return 403 Forbidden
+
+### Step 7: Configure PM2
 
 ```bash
 # Create PM2 ecosystem file
@@ -420,6 +451,14 @@ server {
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-XSS-Protection "1; mode=block" always;
+
+    # Serve uploaded files directly
+    location /uploads/ {
+        alias /home/duely/duely/public/uploads/;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
 
     # Proxy to Next.js app
     location / {
@@ -846,6 +885,76 @@ npm audit
 npm audit fix
 ```
 
+### Access Prisma Studio (Database GUI)
+
+Prisma Studio provides a web-based GUI to view and edit your database.
+
+#### Option 1: SSH Tunnel (Recommended - Secure)
+
+**On your local machine (Windows PowerShell)**:
+
+```powershell
+# Create SSH tunnel
+ssh -L 5556:localhost:5556 duely@YOUR_VPS_IP
+
+# Leave this terminal window open
+```
+
+**On VPS (separate SSH session)**:
+
+```bash
+cd ~/duely
+npx prisma studio
+```
+
+**On your local browser**:
+```
+http://localhost:5556
+```
+
+Prisma Studio will be accessible securely through the SSH tunnel.
+
+#### Option 2: Direct Access (Temporary Only)
+
+**⚠️ WARNING**: This exposes your database to the internet. Only use for quick testing!
+
+```bash
+# On VPS
+cd ~/duely
+npx prisma studio --hostname 0.0.0.0 --port 5556
+
+# Allow port through firewall (temporary)
+sudo ufw allow 5556/tcp
+
+# Access from browser
+# http://YOUR_VPS_IP:5556
+```
+
+**After testing, immediately:**
+```bash
+# Stop Prisma Studio (Ctrl+C)
+
+# Block port again
+sudo ufw delete allow 5556/tcp
+```
+
+#### Option 3: Use MySQL CLI
+
+For quick database queries without GUI:
+
+```bash
+# Login to database
+mysql -u duely_user -p duely_production
+
+# Example queries:
+SELECT * FROM User LIMIT 10;
+SELECT * FROM Subscription WHERE status = 'active';
+SELECT COUNT(*) FROM User;
+
+# Exit
+EXIT;
+```
+
 ---
 
 ## Troubleshooting
@@ -1048,6 +1157,63 @@ crontab -l
 # Should show cron entry for exchange rate updates
 ```
 
+### Profile Photos Not Displaying (404/403 Errors)
+
+**Symptom**: Uploaded profile photos show 404 Not Found or 403 Forbidden errors.
+
+**Solution 1: Create Upload Directory**
+```bash
+cd ~/duely
+mkdir -p public/uploads/profiles
+chmod 755 public/uploads
+chmod 755 public/uploads/profiles
+sudo chown -R duely:www-data public/uploads
+```
+
+**Solution 2: Fix Home Directory Permissions**
+```bash
+# CRITICAL FIX: Allow www-data to traverse into /home/duely
+chmod 711 /home/duely
+
+# Verify fix
+sudo -u www-data test -r ~/duely/public/uploads/profiles/ && echo "✅ Fixed" || echo "❌ Still broken"
+```
+
+**Solution 3: Verify Nginx Configuration**
+```bash
+# Check if /uploads/ location block exists
+sudo grep -A 5 "location /uploads" /etc/nginx/sites-available/yourdomain.com
+
+# If missing, add this block BEFORE "location /" in Nginx config:
+# location /uploads/ {
+#     alias /home/duely/duely/public/uploads/;
+#     expires 30d;
+#     add_header Cache-Control "public, immutable";
+#     access_log off;
+# }
+
+# Reload Nginx
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+**Solution 4: Check Nginx Error Logs**
+```bash
+sudo tail -20 /var/log/nginx/yourdomain.com.error.log
+
+# Look for "Permission denied" errors
+```
+
+**Test Upload**:
+```bash
+# Create test file
+echo "Test" > ~/duely/public/uploads/profiles/test.txt
+
+# Try accessing via browser:
+# https://yourdomain.com/uploads/profiles/test.txt
+
+# Should display "Test" without errors
+```
+
 ### Can't SSH into VPS
 
 **Check from local machine**:
@@ -1173,6 +1339,9 @@ Before going live:
 - [ ] Firewall configured (UFW)
 - [ ] PM2 auto-startup configured
 - [ ] Nginx properly configured
+- [ ] **Profile photo upload directory created (`public/uploads/profiles/`)**
+- [ ] **Home directory permissions fixed (`chmod 711 /home/duely`)**
+- [ ] **Nginx `/uploads/` location block configured**
 - [ ] Payment gateways tested (sandbox)
 - [ ] Email service configured
 - [ ] Exchange rates populated
@@ -1180,6 +1349,7 @@ Before going live:
 - [ ] Logs are being written correctly
 - [ ] Server resources monitored
 - [ ] Backup strategy in place
+- [ ] Profile photo upload tested
 
 ---
 
