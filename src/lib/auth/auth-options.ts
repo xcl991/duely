@@ -75,7 +75,7 @@ export const authOptions: NextAuthOptions = {
     error: "/auth/error",
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       // Handle Google Sign-In
       if (account?.provider === "google" && user.email) {
         try {
