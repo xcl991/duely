@@ -9,6 +9,13 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code"
+        }
+      }
     }),
     CredentialsProvider({
       name: "credentials",
@@ -70,6 +77,18 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
     updateAge: 24 * 60 * 60, // 24 hours - refresh session every 24 hours
   },
+  cookies: {
+    sessionToken: {
+      name: `__Secure-next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: true
+      }
+    },
+  },
+  useSecureCookies: true,
   pages: {
     signIn: "/auth/login",
     error: "/auth/error",
@@ -114,13 +133,8 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
     async jwt({ token, user, trigger, session, account }) {
-      // Type guard: Add user id to token on initial sign in
-      if (user?.id) {
-        token.id = user.id;
-      }
-
-      // For OAuth sign-in, fetch user ID from database
-      if (account?.provider === "google" && user.email && !token.id) {
+      // For OAuth sign-in, ALWAYS fetch user ID from database
+      if (account?.provider === "google" && user?.email) {
         const dbUser = await prisma.user.findUnique({
           where: { email: user.email },
           select: { id: true },
@@ -128,6 +142,11 @@ export const authOptions: NextAuthOptions = {
         if (dbUser) {
           token.id = dbUser.id;
         }
+      }
+
+      // Type guard: Add user id to token on initial sign in for credentials
+      if (user?.id && !account?.provider) {
+        token.id = user.id;
       }
 
       // Handle manual session updates (e.g., profile updates)
