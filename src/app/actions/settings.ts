@@ -40,6 +40,16 @@ export async function getUserSettings(): Promise<UserSettingsData> {
 
   // Create default settings if not exists
   if (!settings) {
+    // Verify user exists in database before creating settings
+    const userExists = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { id: true },
+    });
+
+    if (!userExists) {
+      throw new Error(`User with ID ${user.id} not found in database`);
+    }
+
     settings = await prisma.userSettings.create({
       data: {
         userId: user.id,
@@ -80,6 +90,19 @@ export async function updateUserSettings(data: UpdateSettingsData) {
     });
 
     if (!settings) {
+      // Verify user exists in database before creating settings
+      const userExists = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { id: true },
+      });
+
+      if (!userExists) {
+        return {
+          success: false,
+          error: `User with ID ${user.id} not found in database`,
+        };
+      }
+
       // Create with default values + provided data
       settings = await prisma.userSettings.create({
         data: {
