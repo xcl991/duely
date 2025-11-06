@@ -614,6 +614,12 @@ RESEND_API_KEY="re_your_api_key_here"
 EXCHANGE_RATE_API_KEY="your-exchangerate-api-key"
 
 # ===========================================
+# GOOGLE OAUTH (Sign in with Google)
+# ===========================================
+GOOGLE_CLIENT_ID="your-google-client-id.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+
+# ===========================================
 # LEGACY PAYMENT (Compatibility)
 # ===========================================
 STRIPE_SECRET_KEY="sk_test_dummy"
@@ -643,6 +649,21 @@ STRIPE_SECRET_KEY="sk_test_dummy"
 - Sign up for free (1,500 requests/month)
 - Go to Dashboard
 - Copy your API key
+
+**5. Google OAuth (https://console.cloud.google.com)**
+- Go to Google Cloud Console
+- Create a new project or select existing one
+- Go to "APIs & Services" → "Credentials"
+- Click "Create Credentials" → "OAuth 2.0 Client ID"
+- Application type: "Web application"
+- Add Authorized JavaScript origins:
+  - `https://yourdomain.com`
+- Add Authorized redirect URIs:
+  - `https://yourdomain.com/api/auth/callback/google`
+  - `http://localhost:5566/api/auth/callback/google` (for local testing)
+- Click "Create"
+- Copy Client ID and Client Secret
+- Save both to your `.env` file
 
 **After updating .env**:
 ```bash
@@ -1214,6 +1235,68 @@ echo "Test" > ~/duely/public/uploads/profiles/test.txt
 # Should display "Test" without errors
 ```
 
+### Google OAuth Errors
+
+**Error 400: redirect_uri_mismatch**
+
+**Symptom**: When clicking "Sign in with Google", you get error: "redirect_uri_mismatch"
+
+**Solution**:
+1. Go to Google Cloud Console: https://console.cloud.google.com
+2. Navigate to "APIs & Services" → "Credentials"
+3. Click on your OAuth 2.0 Client ID
+4. Under "Authorized redirect URIs", add:
+   - `https://yourdomain.com/api/auth/callback/google`
+5. Click "Save"
+6. Wait 5 minutes for changes to propagate
+7. Try signing in again
+
+**State cookie was missing**
+
+**Symptom**: Google OAuth callback fails with "State cookie was missing" error in logs
+
+**Solution**: This is fixed in the latest deployment. Ensure you have:
+```bash
+# Check auth-options.ts has secure cookie configuration
+cat ~/duely/src/lib/auth/auth-options.ts | grep -A 10 "cookies:"
+
+# Should show secure cookie config with useSecureCookies: true
+```
+
+If missing, pull latest code:
+```bash
+cd ~/duely
+git pull origin main
+npm install
+npm run build
+pm2 restart duely
+```
+
+**Foreign key constraint violated (userId)**
+
+**Symptom**: After Google Sign-In, dashboard shows errors, PM2 logs show:
+```
+Foreign key constraint violated on the fields: (userId)
+```
+
+**Solution**: This means session has wrong user ID. Fixed in latest version:
+```bash
+cd ~/duely
+git pull origin main
+npm install
+npm run build
+pm2 restart duely
+```
+
+**Check Google OAuth is working**:
+```bash
+# View recent logs
+pm2 logs duely --lines 100
+
+# Look for successful sign-in messages
+# Should NOT see "State cookie was missing" or "Foreign key constraint"
+```
+
 ### Can't SSH into VPS
 
 **Check from local machine**:
@@ -1345,11 +1428,13 @@ Before going live:
 - [ ] Payment gateways tested (sandbox)
 - [ ] Email service configured
 - [ ] Exchange rates populated
+- [ ] **Google OAuth configured (optional but recommended)**
 - [ ] Application accessible via HTTPS
 - [ ] Logs are being written correctly
 - [ ] Server resources monitored
 - [ ] Backup strategy in place
 - [ ] Profile photo upload tested
+- [ ] Google Sign-In tested (if OAuth enabled)
 
 ---
 
