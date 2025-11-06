@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import SessionProvider from "@/components/providers/session-provider";
 import { SidebarProvider } from "@/components/providers/sidebar-provider";
@@ -42,6 +43,23 @@ export default function RootLayout({
             </LanguageSyncProvider>
           </LanguageProvider>
         </SessionProvider>
+
+        {/* Service Worker Registration for Push Notifications */}
+        <Script id="register-sw" strategy="afterInteractive">
+          {`
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                  .then(function(registration) {
+                    console.log('Service Worker registered:', registration.scope);
+                  })
+                  .catch(function(error) {
+                    console.error('Service Worker registration failed:', error);
+                  });
+              });
+            }
+          `}
+        </Script>
       </body>
     </html>
   );

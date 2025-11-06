@@ -69,13 +69,14 @@ model User {
   billingCycle          String?   // "monthly", "yearly"
 
   // Relations
-  accounts      Account[]
-  sessions      Session[]
-  subscriptions Subscription[]
-  categories    Category[]
-  members       Member[]
-  notifications Notification[]
-  settings      UserSettings?
+  accounts          Account[]
+  sessions          Session[]
+  subscriptions     Subscription[]
+  categories        Category[]
+  members           Member[]
+  notifications     Notification[]
+  settings          UserSettings?
+  pushSubscriptions PushSubscription[]
 
   @@index([subscriptionPlan])
   @@index([subscriptionEndDate])
@@ -246,4 +247,28 @@ model ExchangeRate {
   @@unique([baseCurrency, targetCurrency, date])
   @@index([baseCurrency, targetCurrency])
   @@index([date])
+}
+
+// PushSubscription Model - Web Push Notification Subscriptions
+model PushSubscription {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Push subscription details
+  endpoint   String   @unique
+  p256dh     String   // Public key for encryption
+  auth       String   // Authentication secret
+
+  // Device information
+  userAgent  String?
+  deviceName String?  @default("Browser")
+
+  // Metadata
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+  @@index([endpoint])
+  @@map("push_subscriptions")
 }

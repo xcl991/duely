@@ -25,6 +25,7 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { Locale } from "@/lib/i18n/config";
 import { useTranslations } from "@/lib/i18n/hooks";
+import { PushSubscriptionButton } from "@/components/notifications/PushSubscriptionButton";
 
 export default function SettingsPage() {
   const t = useTranslations();
@@ -358,6 +359,19 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Push Notifications */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Browser Push Notifications</CardTitle>
+          <CardDescription>
+            Receive notifications even when the app is closed
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <PushSubscriptionButton />
+        </CardContent>
+      </Card>
 
       {/* Additional Info */}
       <Card>
