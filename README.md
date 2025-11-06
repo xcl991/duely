@@ -1,7 +1,15 @@
-<<<<<<< HEAD
 # 🎯 Duely - Subscription Management Platform
 
-A modern, full-featured subscription management platform built with Next.js 16, featuring multi-language support (English & Indonesian), real-time notifications, and comprehensive analytics.
+![Next.js](https://img.shields.io/badge/Next.js-16.0.1-black?logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)
+![Prisma](https://img.shields.io/badge/Prisma-6.18.0-2D3748?logo=prisma)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?logo=tailwind-css)
+
+A modern, full-featured subscription management platform built with Next.js 16, featuring multi-language support (English & Indonesian), **web push notifications**, real-time notifications, and comprehensive analytics.
+
+🌐 **Live Demo:** [https://duely.online](https://duely.online)
+
+---
 
 ## ✨ Features
 
@@ -12,16 +20,18 @@ A modern, full-featured subscription management platform built with Next.js 16, 
 - 👥 **Family Sharing** - Manage subscriptions for family members
 - 🏷️ **Categories** - Organize subscriptions by custom categories
 - 🔔 **Smart Notifications** - Automatic renewal reminders and budget alerts
+- 🔔 **Web Push Notifications** - Browser push notifications for reminders (NEW!)
 - ⚙️ **Settings** - Customize currency, notifications, and language preferences
 
 ### Technical Features
 - 🌍 **Internationalization (i18n)** - Full support for English and Indonesian
 - 🎨 **Modern UI** - Built with Tailwind CSS and shadcn/ui components
-- 🔐 **Authentication** - Secure NextAuth.js integration
-- 💾 **Database** - Prisma ORM with PostgreSQL/SQLite
+- 🔐 **Authentication** - Secure NextAuth.js v5 integration with Google OAuth
+- 💾 **Database** - Prisma ORM with MySQL (Production) / SQLite (Development)
 - 🚀 **Performance** - Next.js 16 with Turbopack for fast development
 - 📱 **Responsive** - Mobile-first design that works on all devices
 - 🌙 **Theming** - System, light, and dark mode support
+- 🔔 **Push Notifications** - Web Push API with Service Worker support
 
 ## 🌍 Internationalization (i18n)
 
@@ -239,9 +249,21 @@ node phase2-verify.js
 
 ## 📖 Documentation
 
+### Complete Documentation
+- **[DUELY_COMPLETE_DOCUMENTATION.md](DUELY_COMPLETE_DOCUMENTATION.md)** - Complete application documentation
+- **[DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)** - Step-by-step deployment guide
+
+### Push Notifications
+- [PUSH_NOTIFICATION_IMPLEMENTATION_SUMMARY.md](PUSH_NOTIFICATION_IMPLEMENTATION_SUMMARY.md) - Push notification setup
+- [PUSH_NOTIFICATION_VALIDATION_REPORT.md](PUSH_NOTIFICATION_VALIDATION_REPORT.md) - Validation report
+- [PRODUCTION_DEPLOYMENT_GUIDE.md](PRODUCTION_DEPLOYMENT_GUIDE.md) - Production deployment
+
+### i18n Documentation
 - [i18n Implementation Tracker](../I18N_IMPLEMENTATION_TRACKER.md) - Complete i18n implementation history
 - [Translation Workflow Guide](./docs/I18N_WORKFLOW.md) - How to add/update translations
 - [Translation Guide for Developers](./docs/TRANSLATION_GUIDE.md) - Best practices and examples
+
+### Testing & Verification
 - [Phase 9 Report](./PHASE9_REPORT.md) - Final testing and verification
 - [Phase 2 Re-verification](./PHASE2_REVERIFICATION_REPORT.md) - Translation files validation
 
@@ -373,6 +395,4 @@ For issues or questions, please open an issue on GitHub.
 **Built with ❤️ using Next.js 16 and TypeScript**
 
 🌍 **Now available in English and Indonesian!**
-=======
-# duely
->>>>>>> ecce2d5905b2e924f4be09a68754fe45f3da5db2
+🔔 **Now with Web Push Notifications!**
