@@ -1,6 +1,7 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { adminMiddleware, isAdminRoute } from "./lib/admin/middleware";
 
 // Language detection based on country
 function getLanguageFromCountry(country: string | null): string {
@@ -13,8 +14,16 @@ function getLanguageFromCountry(country: string | null): string {
 }
 
 // Middleware to handle auth and language detection
-export default function middleware(request: NextRequest) {
+export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Handle admin routes first
+  if (isAdminRoute(pathname)) {
+    const adminResponse = await adminMiddleware(request);
+    if (adminResponse) {
+      return adminResponse;
+    }
+  }
 
   // Check if this is an auth-protected route
   const isProtectedRoute = [

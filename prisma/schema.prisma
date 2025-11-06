@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -271,4 +271,252 @@ model PushSubscription {
   @@index([userId])
   @@index([endpoint])
   @@map("push_subscriptions")
+}
+
+// Admin Model - Separate admin authentication system
+model Admin {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  password  String    // bcrypt hashed password
+  name      String?
+  lastLogin DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relations
+  logs AdminLog[]
+
+  @@index([email])
+  @@map("admins")
+}
+
+// AdminLog Model - Audit trail for admin actions
+model AdminLog {
+  id        String   @id @default(cuid())
+  adminId   String
+  action    String   // "login", "logout", "view_users", "edit_user", "delete_user", etc.
+  target    String?  // User ID or resource ID affected
+  metadata  String?  // JSON string for additional data
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([createdAt])
+  @@index([action])
+  @@map("admin_logs")
+}
+
+// PHASE 6 MODELS - Advanced Admin Features
+
+// AdminSettings Model - System configuration settings
+model AdminSettings {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String   // Stored as text, parse based on type
+  type        String   // "string", "number", "boolean", "json"
+  category    String   // "general", "security", "notifications", "analytics"
+  description String?
+  isEditable  Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([key])
+  @@map("admin_settings")
+}
+
+// AdminNotification Model - System notifications for admins
+model AdminNotification {
+  id        String    @id @default(cuid())
+  type      String    // "info", "warning", "error", "critical"
+  title     String
+  message   String
+  category  String    // "system", "security", "user_action", "subscription"
+  severity  Int       @default(1) // 1-5
+  isRead    Boolean   @default(false)
+  readAt    DateTime?
+  readBy    String?   // Admin user ID
+  metadata  String?   // JSON string for additional context
+  actionUrl String?   // Link to related resource
+  createdAt DateTime  @default(now())
+  expiresAt DateTime?
+
+  @@index([type])
+  @@index([category])
+  @@index([isRead])
+  @@index([createdAt])
+  @@index([severity])
+  @@map("admin_notifications")
+}
+
+// AdminTwoFactor Model - Two-factor authentication for admin users
+model AdminTwoFactor {
+  id          String    @id @default(cuid())
+  adminId     String    @unique
+  secret      String    // Encrypted TOTP secret
+  backupCodes String    // JSON array of hashed backup codes
+  isEnabled   Boolean   @default(false)
+  enabledAt   DateTime?
+  lastUsedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("admin_two_factors")
+}
+
+// AdminIPWhitelist Model - IP whitelisting for admin access
+model AdminIPWhitelist {
+  id         String    @id @default(cuid())
+  ipAddress  String    @unique
+  label      String    // e.g., "Office Network", "John's Home"
+  adminId    String?   // Optional: specific to admin user
+  isActive   Boolean   @default(true)
+  createdBy  String    // Admin user ID who added this
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  lastUsedAt DateTime?
+
+  @@index([ipAddress])
+  @@index([isActive])
+  @@map("admin_ip_whitelists")
+}
+
+// AdminAccessLog Model - Detailed access logs for security monitoring
+model AdminAccessLog {
+  id        String   @id @default(cuid())
+  adminId   String
+  ipAddress String
+  userAgent String
+  action    String   // "login", "logout", "failed_login"
+  success   Boolean
+  reason    String?  // Failure reason if applicable
+  location  String?  // JSON for GeoIP data (optional)
+  createdAt DateTime @default(now())
+
+  @@index([adminId])
+  @@index([ipAddress])
+  @@index([createdAt])
+  @@index([success])
+  @@map("admin_access_logs")
+}
+
+// EmailTemplate Model - Email templates for system communications
+model EmailTemplate {
+  id        String   @id @default(cuid())
+  key       String   @unique // e.g., "user_welcome", "subscription_expiring"
+  name      String
+  subject   String
+  htmlBody  String
+  textBody  String
+  variables String   // JSON array of available placeholders
+  category  String   // "system", "user", "subscription", "admin"
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+  @@index([category])
+  @@map("email_templates")
+}
+
+// EmailLog Model - Email delivery tracking
+model EmailLog {
+  id          String    @id @default(cuid())
+  templateKey String?
+  recipient   String
+  subject     String
+  status      String    // "sent", "failed", "pending"
+  error       String?
+  sentAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([templateKey])
+  @@map("email_logs")
+}
+
+// BackupJob Model - Backup management
+model BackupJob {
+  id          String    @id @default(cuid())
+  type        String    // "full", "incremental", "export"
+  status      String    // "pending", "running", "completed", "failed"
+  fileSize    Int?
+  filePath    String?
+  error       String?
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdBy   String    // Admin user ID
+  createdAt   DateTime  @default(now())
+
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+  @@map("backup_jobs")
+}
+
+// RateLimitLog Model - Rate limiting tracking
+model RateLimitLog {
+  id          String   @id @default(cuid())
+  identifier  String   // IP address or user ID
+  endpoint    String
+  method      String
+  count       Int      @default(1)
+  windowStart DateTime
+  windowEnd   DateTime
+  blocked     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([identifier, endpoint, windowStart])
+  @@index([blocked])
+  @@map("rate_limit_logs")
+}
+
+// Webhook Model - Webhook management for integrations
+model Webhook {
+  id          String            @id @default(cuid())
+  url         String
+  events      String            // JSON array of event types
+  secret      String            // Webhook signing secret
+  isActive    Boolean           @default(true)
+  retryConfig String            // JSON for retry policy
+  headers     String?           // JSON for custom headers
+  createdBy   String            // Admin user ID
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  // Relations
+  deliveries  WebhookDelivery[]
+
+  @@index([isActive])
+  @@map("webhooks")
+}
+
+// WebhookDelivery Model - Webhook delivery tracking
+model WebhookDelivery {
+  id           String    @id @default(cuid())
+  webhookId    String
+  event        String
+  payload      String    // JSON payload
+  status       String    // "pending", "success", "failed"
+  responseCode Int?
+  responseBody String?
+  error        String?
+  attemptCount Int       @default(1)
+  nextRetryAt  DateTime?
+  deliveredAt  DateTime?
+  createdAt    DateTime  @default(now())
+
+  // Relations
+  webhook      Webhook   @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@index([webhookId])
+  @@index([status])
+  @@index([event])
+  @@index([createdAt])
+  @@map("webhook_deliveries")
 }

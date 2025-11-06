@@ -1,0 +1,9 @@
+src/app/(adminpage)/dashboard/settings/page.tsx(52,53): error TS2345: Argument of type '(setting: Setting) => void' is not assignable to parameter of type '(value: unknown, index: number, array: unknown[]) => void'.
+  Types of parameters 'setting' and 'value' are incompatible.
+    Type 'unknown' is not assignable to type 'Setting'.
+src/lib/utils/__tests__/calculations.test.ts(190,36): error TS2339: Property 'find' does not exist on type 'Promise<CategoryTotal[]>'.
+src/lib/utils/__tests__/calculations.test.ts(191,35): error TS2339: Property 'find' does not exist on type 'Promise<CategoryTotal[]>'.
+src/lib/utils/__tests__/calculations.test.ts(212,36): error TS2339: Property 'find' does not exist on type 'Promise<CategoryTotal[]>'.
+src/lib/utils/__tests__/calculations.test.ts(286,27): error TS2339: Property 'find' does not exist on type 'Promise<{ memberId: string | null; memberName: string; total: number; count: number; }[]>'.
+src/lib/utils/__tests__/calculations.test.ts(287,27): error TS2339: Property 'find' does not exist on type 'Promise<{ memberId: string | null; memberName: string; total: number; count: number; }[]>'.
+src/lib/utils/__tests__/calculations.test.ts(306,33): error TS2339: Property 'find' does not exist on type 'Promise<{ memberId: string | null; memberName: string; total: number; count: number; }[]>'.

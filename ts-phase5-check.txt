@@ -1,0 +1,11 @@
+src/app/api/admin/analytics/overview/route.ts(134,7): error TS2322: Type '{ mrr: number; activeSubscriptions: number; totalUsers: number; }' is not assignable to type 'null'.
+src/components/admin/analytics/DistributionChart.tsx(66,26): error TS6133: 'entry' is declared but its value is never read.
+src/lib/admin/analytics.ts(14,3): error TS6133: 'differenceInDays' is declared but its value is never read.
+src/lib/admin/analytics.ts(15,3): error TS6133: 'differenceInMonths' is declared but its value is never read.
+src/lib/admin/analytics.ts(181,11): error TS6133: 'intervalStart' is declared but its value is never read.
+src/lib/utils/__tests__/calculations.test.ts(190,36): error TS2339: Property 'find' does not exist on type 'Promise<CategoryTotal[]>'.
+src/lib/utils/__tests__/calculations.test.ts(191,35): error TS2339: Property 'find' does not exist on type 'Promise<CategoryTotal[]>'.
+src/lib/utils/__tests__/calculations.test.ts(212,36): error TS2339: Property 'find' does not exist on type 'Promise<CategoryTotal[]>'.
+src/lib/utils/__tests__/calculations.test.ts(286,27): error TS2339: Property 'find' does not exist on type 'Promise<{ memberId: string | null; memberName: string; total: number; count: number; }[]>'.
+src/lib/utils/__tests__/calculations.test.ts(287,27): error TS2339: Property 'find' does not exist on type 'Promise<{ memberId: string | null; memberName: string; total: number; count: number; }[]>'.
+src/lib/utils/__tests__/calculations.test.ts(306,33): error TS2339: Property 'find' does not exist on type 'Promise<{ memberId: string | null; memberName: string; total: number; count: number; }[]>'.

@@ -1,0 +1,11 @@
+src/components/admin/analytics/DistributionChart.tsx(61,15): error TS2322: Type '({ name, percentage }: { name: string; percentage: number; }) => string' is not assignable to type 'PieLabel | undefined'.
+  Type '({ name, percentage }: { name: string; percentage: number; }) => string' is not assignable to type '(props: PieLabelRenderProps) => ReactNode | ReactElement<SVGElement, string | JSXElementConstructor<any>>'.
+    Types of parameters '__0' and 'props' are incompatible.
+      Property 'percentage' is missing in type 'PieLabelRenderProps' but required in type '{ name: string; percentage: number; }'.
+src/components/admin/analytics/DistributionChart.tsx(66,26): error TS6133: 'entry' is declared but its value is never read.
+src/lib/utils/__tests__/calculations.test.ts(190,36): error TS2339: Property 'find' does not exist on type 'Promise<CategoryTotal[]>'.
+src/lib/utils/__tests__/calculations.test.ts(191,35): error TS2339: Property 'find' does not exist on type 'Promise<CategoryTotal[]>'.
+src/lib/utils/__tests__/calculations.test.ts(212,36): error TS2339: Property 'find' does not exist on type 'Promise<CategoryTotal[]>'.
+src/lib/utils/__tests__/calculations.test.ts(286,27): error TS2339: Property 'find' does not exist on type 'Promise<{ memberId: string | null; memberName: string; total: number; count: number; }[]>'.
+src/lib/utils/__tests__/calculations.test.ts(287,27): error TS2339: Property 'find' does not exist on type 'Promise<{ memberId: string | null; memberName: string; total: number; count: number; }[]>'.
+src/lib/utils/__tests__/calculations.test.ts(306,33): error TS2339: Property 'find' does not exist on type 'Promise<{ memberId: string | null; memberName: string; total: number; count: number; }[]>'.
