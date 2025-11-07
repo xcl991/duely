@@ -2,6 +2,7 @@ import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { adminMiddleware, isAdminRoute } from "./lib/admin/middleware";
+import { checkMaintenanceMode } from "./lib/maintenance";
 
 // Language detection based on country
 function getLanguageFromCountry(country: string | null): string {
@@ -16,6 +17,31 @@ function getLanguageFromCountry(country: string | null): string {
 // Middleware to handle auth and language detection
 export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // === MAINTENANCE MODE CHECK ===
+  // Paths that bypass maintenance mode
+  const maintenanceBypassPaths = [
+    '/adminpage',           // Admin panel always accessible
+    '/api/admin',           // Admin APIs work
+    '/maintenance',         // Maintenance page itself
+    '/_next',               // Next.js internal files
+    '/favicon.ico',         // Favicon
+    '/api/auth',            // NextAuth API routes
+  ];
+
+  const shouldBypass = maintenanceBypassPaths.some(path =>
+    pathname.startsWith(path)
+  );
+
+  // Check maintenance mode (only for non-bypass paths)
+  if (!shouldBypass) {
+    const isMaintenanceActive = await checkMaintenanceMode();
+    if (isMaintenanceActive) {
+      // Redirect to maintenance page
+      return NextResponse.rewrite(new URL('/maintenance', request.url));
+    }
+  }
+  // === END MAINTENANCE MODE CHECK ===
 
   // Handle admin routes first
   if (isAdminRoute(pathname)) {

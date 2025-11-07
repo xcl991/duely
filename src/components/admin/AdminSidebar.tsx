@@ -12,7 +12,8 @@ import {
   BarChart3,
   Settings,
   Bell,
-  Activity
+  Activity,
+  Construction
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -48,6 +49,11 @@ const menuItems = [
     title: 'System Health',
     href: '/adminpage/dashboard/system/health',
     icon: Activity,
+  },
+  {
+    title: 'Maintenance',
+    href: '/adminpage/dashboard/maintenance',
+    icon: Construction,
   },
   {
     title: 'Settings',

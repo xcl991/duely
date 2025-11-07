@@ -520,3 +520,44 @@ model WebhookDelivery {
   @@index([createdAt])
   @@map("webhook_deliveries")
 }
+
+// PHASE 7 - MAINTENANCE MODE MODELS
+
+// MaintenanceMode Model - Control site-wide maintenance mode
+model MaintenanceMode {
+  id                  String    @id @default(cuid())
+  isEnabled           Boolean   @default(false)
+  message             String?   // Custom message to display
+  estimatedEndTime    DateTime? // When maintenance is expected to end
+  startedAt           DateTime? // When maintenance was activated
+  endedAt             DateTime? // When maintenance was deactivated
+  startedBy           String?   // Admin ID who activated
+  endedBy             String?   // Admin ID who deactivated
+  allowAdminAccess    Boolean   @default(true) // Allow admin panel access during maintenance
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([isEnabled])
+  @@map("maintenance_mode")
+}
+
+// MaintenanceLog Model - History of all maintenance sessions
+model MaintenanceLog {
+  id            String    @id @default(cuid())
+  startedAt     DateTime
+  endedAt       DateTime?
+  duration      Int?      // Duration in minutes
+  message       String?   // Maintenance message used
+  startedBy     String    // Admin ID
+  startedByName String?   // Admin name for easier reading
+  endedBy       String?   // Admin ID
+  endedByName   String?   // Admin name for easier reading
+  reason        String?   // "deployment", "emergency", "scheduled", "database"
+  notes         String?   // Additional notes
+  createdAt     DateTime  @default(now())
+
+  @@index([startedAt])
+  @@index([endedAt])
+  @@index([startedBy])
+  @@map("maintenance_logs")
+}
